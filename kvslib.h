@@ -12,6 +12,8 @@ public:
 
     T get(std::string key);
     void put(std::string key, T value);
+    void remove(std::string key);
 };
 
 template class KeyValueStore<int>;
+template class KeyValueStore<std::string>;

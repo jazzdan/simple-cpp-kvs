@@ -18,3 +18,9 @@ void KeyValueStore<T>::put(string key, T value)
 {
     this->internalKeyValue.insert(std::make_pair(key, value));
 }
+
+template <typename T>
+void KeyValueStore<T>::remove(string key)
+{
+    this->internalKeyValue.erase(key);
+}
