@@ -3,7 +3,7 @@
 
 int main()
 {
-    KeyValueStore<int> x = KeyValueStore<int>();
+    InMemoryKVS<int> x = InMemoryKVS<int>();
     x.put("hello", 5);
 
     std::cout << x.get("hello") << std::endl;
@@ -12,9 +12,9 @@ int main()
 
     std::cout << x.get("hello") << std::endl;
 
-    KeyValueStore<std::string> y = KeyValueStore<std::string>();
+    InMemoryKVS<std::string> y = InMemoryKVS<std::string>();
     std::string str("world");
     y.put("hello", str);
-    std::cout << y.get("foo").length() << std::endl;
+    std::cout << y.get("foo") << std::endl;
     return 0;
 }
