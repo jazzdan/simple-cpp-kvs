@@ -1,18 +1,20 @@
 #include "kvslib.h"
 
-// Use everything from the 'std' namespace.
-// This lets us write 'string' instead of 'std::string'.
 using namespace std;
 
-namespace kvs
+template <typename T>
+KeyValueStore<T>::KeyValueStore()
 {
+}
 
-    // Define the function itself. This could have also been written as:
-    // std::string hello_world::hello()
-    string hello()
-    {
-        // Return the string we need.
-        return "Hello, World!";
-    }
+template <typename T>
+T KeyValueStore<T>::get(string key)
+{
+    return this->internalKeyValue[key];
+}
 
-} // namespace kvs
+template <typename T>
+void KeyValueStore<T>::put(string key, T value)
+{
+    this->internalKeyValue.insert(std::make_pair(key, value));
+}

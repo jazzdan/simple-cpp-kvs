@@ -1,6 +1,17 @@
 #include <string>
+#include <map>
 
-namespace kvs
+template <typename T>
+class KeyValueStore
 {
-    std::string hello();
-}
+private:
+    std::map<std::string, T> internalKeyValue;
+
+public:
+    KeyValueStore();
+
+    T get(std::string key);
+    void put(std::string key, T value);
+};
+
+template class KeyValueStore<int>;
