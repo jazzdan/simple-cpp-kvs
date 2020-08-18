@@ -1,0 +1,18 @@
+#include "kvslib.h"
+
+// Use everything from the 'std' namespace.
+// This lets us write 'string' instead of 'std::string'.
+using namespace std;
+
+namespace kvs
+{
+
+    // Define the function itself. This could have also been written as:
+    // std::string hello_world::hello()
+    string hello()
+    {
+        // Return the string we need.
+        return "Hello, World!";
+    }
+
+} // namespace kvs
