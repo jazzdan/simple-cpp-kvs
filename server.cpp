@@ -39,22 +39,14 @@ int main()
 
     // Now since `getaddrinfo()` has given us a list of addresses
     // we're going to iterate over them and ask usr to choose one address for program to bind to
+    // TODO(dmiller): Just grab the first one maybe?
     for (p = res; p != NULL; p = p->ai_next)
     {
         void *addr;
-        std::string ipVer;
 
         // if address is ipv4 address
-        if (p->ai_family == AF_INET)
-        {
-            ipVer = "IPv4";
-            sockaddr_in *ipv4 = reinterpret_cast<sockaddr_in *>(p->ai_addr);
-            addr = &(ipv4->sin_addr);
-        }
-        else
-        {
-            continue;
-        }
+        sockaddr_in *ipv4 = reinterpret_cast<sockaddr_in *>(p->ai_addr);
+        addr = &(ipv4->sin_addr);
 
         // convert IPv4 from binary to text form
         inet_ntop(p->ai_family, addr, ipStr, sizeof(ipStr));
