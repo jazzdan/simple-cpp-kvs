@@ -1,6 +1,7 @@
 #include <cstring> // sizeof()
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -10,6 +11,25 @@
 #include <unistd.h> // close()
 
 #include "kvslib.h"
+
+std::string send_and_recv(int fd, std::string prompt)
+{
+    unsigned int prompt_len = prompt.length();
+    auto prompt_bytes_sent = send(fd, prompt.data(), prompt_len, 0);
+    if (prompt_bytes_sent != prompt_len)
+    {
+        // TODO(dmiller): actual retry
+        throw 42;
+    }
+
+    std::vector<char> buf(2048);
+    // TODO(dmiller): what should I do with this variable?
+    auto response_bytes_received = recv(fd, buf.data(), buf.size(), 0);
+
+    std::string str(buf.begin(), buf.end());
+
+    return str;
+}
 
 int main()
 {
@@ -22,7 +42,7 @@ int main()
     // for more explanation, `man socket`
     hints.ai_family = AF_UNSPEC;     // don't specify which IP version to use
     hints.ai_socktype = SOCK_STREAM; // TCP
-    hints.ai_flags = AI_PASSIVE;
+    hints.ai_flags = AI_PASSIVE;     // bind to the IP of the host, in other words: don't specify it
 
     // man getaddrinfo
     auto gAddRes = getaddrinfo(NULL, portNum, &hints, &res);
@@ -39,7 +59,7 @@ int main()
 
     // Now since `getaddrinfo()` has given us a list of addresses
     // we're going to iterate over them and ask usr to choose one address for program to bind to
-    // TODO(dmiller): Just grab the first one maybe?
+    // TODO(dmiller): error handling
     for (p = res; p != NULL; p = p->ai_next)
     {
         void *addr;
@@ -124,8 +144,19 @@ int main()
 
         // send call sends the data you specify as second param and it's length as third param
         // also returns how many bytes were actually written
+        unsigned int response_len = response.length();
         auto bytes_sent = send(newFD, response.data(), response.length(), 0);
+
         std::cout << "Sent " << bytes_sent << " bytes" << std::endl;
+        if (bytes_sent != response_len)
+        {
+            std::cerr << "Which is not what we thought we would send (" << response_len << ")" << std::endl;
+        }
+
+        auto resp = send_and_recv(newFD, "Please enter something");
+
+        std::cout << "They entered: " << resp << std::endl;
+
         close(newFD);
     }
 
