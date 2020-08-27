@@ -62,7 +62,7 @@ int main()
     // if no addresses found :(
     if (!foundAddress)
     {
-        std::cerr << "Found no host address to use\n";
+        std::cerr << "Found no host address to use" << std::endl;
         return -3;
     }
 
