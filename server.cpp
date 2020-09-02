@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <assert.h>
 #include <netdb.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -9,15 +10,21 @@
 #include <string>
 #include <vector>
 
+#include "cli.h"
 #include "kvslib.h"
 
-std::string send_and_recv(int fd, std::string prompt) {
-  unsigned int prompt_len = prompt.length();
-  auto prompt_bytes_sent = send(fd, prompt.data(), prompt_len, 0);
-  if (prompt_bytes_sent != prompt_len) {
+// TODO(dmiller): send back updated version of kvs on each message received
+void send(int fd, std::string msg) {
+  unsigned int msg_len = msg.length();
+  auto prompt_bytes_sent = send(fd, msg.data(), msg_len, 0);
+  if (prompt_bytes_sent != msg_len) {
     // TODO(dmiller): actual retry
     throw 42;
   }
+}
+
+std::string send_and_recv(int fd, std::string prompt) {
+  send(fd, prompt);
 
   std::vector<char> buf(2048);
   // TODO(dmiller): what should I do with this variable?
@@ -28,7 +35,10 @@ std::string send_and_recv(int fd, std::string prompt) {
   return str;
 }
 
+// TODO(dmiller): create a function that takes a command and a KVS and executes
+// it
 int main() {
+  auto myKVS = InMemoryKVS<std::string>();
   auto portNum = "9669";
   const unsigned int backlog =
       8;  // number of connections allowed on the incoming queue
@@ -146,7 +156,29 @@ int main() {
 
     auto resp = send_and_recv(newFD, "Please enter something:\n");
 
-    std::cout << "They entered: " << resp << std::endl;
+    std::cout << "You entered: " << resp << std::endl;
+
+    try {
+      auto cmd = parse(resp);
+      std::cout << cmd << std::endl;
+      switch (cmd.getOp()) {
+        case getOp: {
+          auto value = myKVS.get(cmd.getKey());
+          send(newFD, value);
+          break;
+        }
+        case setOp:
+          assert(cmd.getValue().has_value());
+          myKVS.put(cmd.getKey(), cmd.getValue().value());
+          send(newFD, myKVS.get(cmd.getKey()));
+          break;
+        case deleteOp:
+          myKVS.remove(cmd.getKey());
+          break;
+      }
+    } catch (std::string e) {
+      std::cerr << "Error parsing cmd: " << e << std::endl;
+    }
 
     close(newFD);
   }
@@ -155,18 +187,4 @@ int main() {
   freeaddrinfo(res);
 
   return 0;
-  // InMemoryKVS<int> x = InMemoryKVS<int>();
-  // x.put("hello", 5);
-
-  // std::cout << x.get("hello") << std::endl;
-
-  // x.remove("hello");
-
-  // std::cout << x.get("hello") << std::endl;
-
-  // InMemoryKVS<std::string> y = InMemoryKVS<std::string>();
-  // std::string str("world");
-  // y.put("hello", str);
-  // std::cout << y.get("foo") << std::endl;
-  // return 0;
 }

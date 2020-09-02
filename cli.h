@@ -1,8 +1,29 @@
 #include <optional>
+#include <ostream>
 #include <string>
 #include <tuple>
 
-using key = std::string;
-using op = std::string;
+enum Op { getOp, setOp, deleteOp };
 
-std::tuple<op, key, std::optional<std::string>> parse(std::string cmd);
+using key = std::string;
+using value = std::optional<std::string>;
+
+class Command {
+ private:
+  Op myOp;
+  key myKey;
+  value myValue;
+
+ public:
+  Command(Op, key, value);
+  friend std::ostream& operator<<(std::ostream&, const Command&);
+  bool operator==(const Command& cmd) const {
+    return this->myKey == cmd.myKey && this->myOp == cmd.myOp &&
+           this->myValue == cmd.myValue;
+  };
+  Op getOp();
+  key getKey();
+  value getValue();
+};
+
+Command parse(std::string cmd);
