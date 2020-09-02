@@ -14,6 +14,25 @@ std::tuple<string, string, optional<string>> handleSet(vector<string> parts) {
   return tuple<string, string, optional<string>>{"set", parts[1], parts[2]};
 }
 
+std::tuple<string, string, optional<string>> handleGet(vector<string> parts) {
+  if (parts.size() != 2) {
+    throw "incorrect number of arguments";
+  }
+
+  return tuple<string, string, optional<string>>{"get", parts[1],
+                                                 optional<string>{}};
+}
+
+std::tuple<string, string, optional<string>> handleDelete(
+    vector<string> parts) {
+  if (parts.size() != 2) {
+    throw "incorrect number of arguments";
+  }
+
+  return tuple<string, string, optional<string>>{"delete", parts[1],
+                                                 optional<string>{}};
+}
+
 std::tuple<string, string, optional<string>> parse(string cmd) {
   vector<string> parts = absl::StrSplit(cmd, " ");
 
@@ -21,13 +40,15 @@ std::tuple<string, string, optional<string>> parse(string cmd) {
     throw "can't parse an empty string";
   }
 
-  auto verb = parts[0];
+  auto op = parts[0];
 
-  if (verb == "set") {
+  if (op == "set") {
     return handleSet(parts);
+  } else if (op == "get") {
+    return handleGet(parts);
+  } else if (op == "delete") {
+    return handleDelete(parts);
   } else {
-    throw "invalid verb";
+    throw "invalid op";
   }
-
-  return tuple<string, string, optional<string>>{};
 }
