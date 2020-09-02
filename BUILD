@@ -9,6 +9,9 @@ cc_library(
   name = "cli",
   srcs = ["cli.cpp"],
   hdrs = ["cli.h"],
+  deps = [
+    "@com_google_absl//absl/strings",
+  ]
 )
 
 cc_test(
