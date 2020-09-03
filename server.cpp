@@ -135,6 +135,7 @@ int main() {
   // infinite loop to communicate with incoming connections
   // this will take clioent connections one at a time
   // in future use `fork()`
+  // TODO(dmiller): why does this quit out after one command?
   while (true) {
     // accept call will give us a new socket descriptor
     int newFD = accept(sockFD, (sockaddr *)&client_addr, &client_addr_size);
