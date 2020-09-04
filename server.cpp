@@ -136,6 +136,7 @@ int main() {
   // this will take clioent connections one at a time
   // in future use `fork()`
   // TODO(dmiller): why does this quit out after one command?
+  // TODO(dmiller): maybe it's time to use GDB?
   while (true) {
     // accept call will give us a new socket descriptor
     int newFD = accept(sockFD, (sockaddr *)&client_addr, &client_addr_size);
