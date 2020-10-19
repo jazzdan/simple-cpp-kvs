@@ -16,7 +16,7 @@ cc_library(
 
 cc_test(
   name = "tests",
-  srcs = ["cli.cpp", "cli.h", "cli_test.cpp"],
+  srcs = ["cli.cpp", "cli.h", "cli_test.cpp", "server_test.cpp", "kvslib.cpp", "kvslib.h"],
   deps = [
     ":cli",
     "@gtest//:gtest_main",

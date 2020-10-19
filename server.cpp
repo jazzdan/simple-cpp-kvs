@@ -13,8 +13,8 @@
 #include "cli.h"
 #include "kvslib.h"
 
-// TODO(dmiller): send back updated version of kvs on each message received
-void send(int fd, std::string msg) {
+void plain_send(int fd, std::string msg) {
+  std::cout << "Sending " << msg << std::endl;
   unsigned int msg_len = msg.length();
   auto prompt_bytes_sent = send(fd, msg.data(), msg_len, 0);
   if (prompt_bytes_sent != msg_len) {
@@ -24,7 +24,7 @@ void send(int fd, std::string msg) {
 }
 
 std::string send_and_recv(int fd, std::string prompt) {
-  send(fd, prompt);
+  plain_send(fd, prompt);
 
   std::vector<char> buf(2048);
   // TODO(dmiller): what should I do with this variable?
@@ -65,10 +65,8 @@ int main() {
   auto foundAddress = false;
   char ipStr[INET6_ADDRSTRLEN];  // ipv6 length
 
-  // Now since `getaddrinfo()` has given us a list of addresses
-  // we're going to iterate over them and ask usr to choose one address for
-  // program to bind to
-  // TODO(dmiller): error handling
+  // find address to bind to
+  // ... always bind to 0.0.0.0 heh
   for (p = res; p != NULL; p = p->ai_next) {
     void *addr;
 
@@ -130,7 +128,7 @@ int main() {
   sockaddr_storage client_addr;
   socklen_t client_addr_size = sizeof(client_addr);
 
-  const std::string response = "Hello World";
+  const std::string response = "Hello World\n";
 
   // infinite loop to communicate with incoming connections
   // this will take clioent connections one at a time
@@ -163,16 +161,21 @@ int main() {
     try {
       auto cmd = parse(resp);
       std::cout << cmd << std::endl;
+      // TODO huh, why can't we retrieve values out of this??
       switch (cmd.getOp()) {
         case getOp: {
           auto value = myKVS.get(cmd.getKey());
-          send(newFD, value);
+          std::cout << "Retrieved: " << value << "for key " << cmd.getKey()
+                    << std::endl;
+          plain_send(newFD, value);
           break;
         }
         case setOp:
           assert(cmd.getValue().has_value());
+          std::cout << "Setting " << cmd.getKey() << " to "
+                    << cmd.getValue().value() << std::endl;
           myKVS.put(cmd.getKey(), cmd.getValue().value());
-          send(newFD, myKVS.get(cmd.getKey()));
+          plain_send(newFD, myKVS.get(cmd.getKey()));
           break;
         case deleteOp:
           myKVS.remove(cmd.getKey());
